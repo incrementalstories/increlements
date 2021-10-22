@@ -3,29 +3,29 @@
 function replacer(_key: string, value: any) {
   if (value instanceof Map) {
     return {
-      dataType: "Map",
+      dataType: 'Map',
       value: Array.from(value.entries()), // or with spread: value: [...value]
     };
-  } else if (value instanceof Set) {
+  } if (value instanceof Set) {
     return {
-      dataType: "Set",
+      dataType: 'Set',
       value: Array.from(value.entries()),
     };
-  } else {
-    return value;
   }
+  return value;
 }
 function reviver(_key: string, value: any) {
-  if (typeof value === "object" && value !== null) {
-    if (value.dataType === "Map") {
+  if (typeof value === 'object' && value !== null) {
+    if (value.dataType === 'Map') {
       return new Map(value.value);
-    } else if (value.dataType === "Set") {
+    } if (value.dataType === 'Set') {
       return new Set(value.value);
     }
   }
   return value;
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function jsonify(obj: any): string {
   return JSON.stringify(obj, replacer);
 }

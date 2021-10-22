@@ -1,6 +1,6 @@
-import { put, select, takeEvery } from "@redux-saga/core/effects";
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { TimeState } from "./time";
+import { put, select, takeEvery } from 'redux-saga/effects';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { TimeState } from './time';
 
 export type LoreState = {
   history: Array<LoreEntry>;
@@ -11,14 +11,14 @@ export type LoreEntry = {
   text: string;
 };
 
-export const NEW_LORE = "lore:new";
+export const NEW_LORE = 'lore:new';
 
 const initialState: LoreState = {
   history: [],
 };
 
 const slice = createSlice({
-  name: "lore",
+  name: 'lore',
   initialState,
   reducers: {
     load(state, action: PayloadAction<LoreState>) {
@@ -34,8 +34,9 @@ export const { load, addLore } = slice.actions;
 
 export default slice.reducer;
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function* loreSaga() {
-  yield takeEvery(NEW_LORE, function* (lore: PayloadAction<string>) {
+  yield takeEvery(NEW_LORE, function* addingLore(lore: PayloadAction<string>) {
     const time: TimeState = yield select((state) => state.time);
     yield put(
       addLore({

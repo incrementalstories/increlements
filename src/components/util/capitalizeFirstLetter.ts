@@ -1,6 +1,6 @@
-const capitalizeFirstLetter = (
+export default function capitalizeFirstLetter(
   [first, ...rest]: string,
-  locale = navigator.language,
-) => first.toLocaleUpperCase(locale) + rest.join("");
-
-export default capitalizeFirstLetter;
+  locale = navigator.language
+): string {
+  return first.toLocaleUpperCase(locale) + rest.join('');
+}

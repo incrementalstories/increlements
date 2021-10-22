@@ -1,13 +1,13 @@
-import { ISagaModule } from "redux-dynamic-modules-saga";
-import elementsReducer, { ElementsState, elementsSaga } from "./elements";
-import ElementsBoard from "./ElementsBoard";
+import { ISagaModule } from 'redux-dynamic-modules-saga';
+import elementsReducer, { ElementsState, elementsSaga } from './elements';
+import ElementsBoard from './ElementsBoard';
 
 export interface LayersState {
   elements: ElementsState;
 }
 
 export const LayersModule: ISagaModule<LayersState> = {
-  id: "layers",
+  id: 'layers',
   reducerMap: {
     elements: elementsReducer,
   },

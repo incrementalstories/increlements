@@ -1,31 +1,30 @@
-import React, { ReactElement } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { LayersModule, LayersState } from ".";
+import React, { ReactElement } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { LayersState } from '.';
 
-import "./ElementsBoard.css";
+import './ElementsBoard.css';
+import { Gauge } from 'components/util/Gauge';
+import roundDP from 'components/util/roundDP';
+import capitalizeFirstLetter from 'components/util/capitalizeFirstLetter';
 import {
   DISCOVER_WILL,
   Element,
   ElementsCollection,
-  ElementsState,
   ElementState,
   FOCUS_WILL,
   forceGen,
   GEN_COST,
   Status,
-} from "./elements";
-import { Gauge } from "components/util/Gauge";
-import { roundDP } from "components/util/roundDP";
-import capitalizeFirstLetter from "components/util/capitalizeFirstLetter";
+} from './elements';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 type DragElement = {
   merge: string;
   name: Element;
   action: string | false;
 };
 
-const Element = ({ name }: { name: Element }): ReactElement => {
-  const dispatch = useDispatch();
+const ElementUI = ({ name }: { name: Element }): ReactElement => {
   const { element } = useSelector((state: LayersState) => ({
     element: state.elements.elements[name],
   }));
@@ -82,7 +81,7 @@ const Element = ({ name }: { name: Element }): ReactElement => {
     case Status.ACTIVE:
     case Status.PASSIVE:
       return (
-        <div style={{ display: "inline-block" }}>
+        <div style={{ display: 'inline-block' }}>
           <Gauge
             value={element.value}
             max={element.max}
@@ -103,28 +102,28 @@ const Actions = (): ReactElement => {
   }));
 
   const ALL_ELEMENTS: Array<Element> = [
-    "will",
-    "air",
-    "earth",
-    "fire",
-    "water",
+    'will',
+    'air',
+    'earth',
+    'fire',
+    'water',
   ];
 
   const discoverAction = (name: Element) => {
     switch (name) {
-      case "will":
+      case 'will':
         return (
           <button
-            key={"discover" + name}
+            key={`discover${name}`}
             onClick={() => dispatch({ type: DISCOVER_WILL })}
           >
             Gather your thoughts
           </button>
         );
-      case "air":
+      case 'air':
         return (
           <button
-            key={"discover" + name}
+            key={`discover${name}`}
             onClick={() => dispatch({ type: FOCUS_WILL })}
           >
             Focus your will
@@ -141,14 +140,16 @@ const Actions = (): ReactElement => {
     element: ElementState,
     allElements: ElementsCollection<ElementState>,
   ) => {
-    const will = allElements.will;
+    const { will } = allElements;
     return (
       <button
-        key={"activate" + name}
+        key={`activate${name}`}
         onClick={() => dispatch(forceGen(name))}
         disabled={will.value < GEN_COST || element.value >= element.max}
       >
-        Generate {name}
+        Generate
+        {' '}
+        {name}
       </button>
     );
   };
@@ -156,9 +157,9 @@ const Actions = (): ReactElement => {
   const actions = [];
   for (const elt of ALL_ELEMENTS) {
     const element = elements[elt];
-    if (element.status == Status.DISCOVERABLE) {
-      actions.push(discoverAction(elt)); //, element, base.elements));
-    } else if (element.status == Status.ACTIVE) {
+    if (element.status === Status.DISCOVERABLE) {
+      actions.push(discoverAction(elt)); // , element, base.elements));
+    } else if (element.status === Status.ACTIVE) {
       actions.push(activeAction(elt, element, elements));
     }
   }
@@ -167,20 +168,20 @@ const Actions = (): ReactElement => {
 };
 
 const ElementsBoard: React.FC = (): ReactElement => {
-  const base = useSelector((state: LayersState) => state.elements);
+  // const base = useSelector((state: LayersState) => state.elements);
 
   const ALL_ELEMENTS: Array<Element> = [
-    "will",
-    "air",
-    "earth",
-    "fire",
-    "water",
+    'will',
+    'air',
+    'earth',
+    'fire',
+    'water',
   ];
 
   return (
     <div className="elementsboard">
       {ALL_ELEMENTS.map((elt) => (
-        <Element key={"element" + elt} name={elt} />
+        <ElementUI key={`element${elt}`} name={elt} />
       ))}
 
       <Actions />

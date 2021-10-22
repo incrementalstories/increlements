@@ -1,5 +1,5 @@
-import { call, delay, put } from "redux-saga/effects";
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { call, delay, put } from 'redux-saga/effects';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 export type TimeState = {
   pageOpen: DOMHighResTimeStamp;
@@ -18,7 +18,7 @@ const initialState: TimeState = {
 };
 
 const timeSlice = createSlice({
-  name: "time",
+  name: 'time',
   initialState,
   reducers: {
     load(state, action: PayloadAction<TimeState>) {
@@ -35,6 +35,7 @@ const timeSlice = createSlice({
 
 export const { load, tick } = timeSlice.actions;
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function* timeSaga() {
   while (true) {
     yield delay(16);

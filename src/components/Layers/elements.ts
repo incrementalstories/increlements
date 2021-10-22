@@ -1,6 +1,8 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { all, delay, put, select, take, takeLatest } from "redux-saga/effects";
-import { TICK_EVENT, CoreState, newLore } from "../Core";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import {
+  all, delay, put, select, take, takeLatest,
+} from 'redux-saga/effects';
+import { TICK_EVENT, CoreState, newLore } from '../Core';
 
 export enum Status {
   HIDDEN,
@@ -16,7 +18,7 @@ enum GeneratorMode {
   PROPORTIONAL, // only drain source and grow target proportional to available space
 }
 
-export type Element = "will" | "air" | "earth" | "fire" | "water";
+export type Element = 'will' | 'air' | 'earth' | 'fire' | 'water';
 
 export interface ElementState {
   status: Status;
@@ -69,17 +71,27 @@ function emptyStats() {
 }
 
 function drainGenerator(name: string, rate = 0.1): ElementGenerator {
-  return { name: name + '_drain', src: name, srcPerSecond: rate };
+  return { name: `${name}_drain`, src: name, srcPerSecond: rate };
 }
 
 const initialState: ElementsState = {
   last: -1,
   elements: {
-    will: { status: Status.HIDDEN, value: 0.0, max: 100.0, merge: false },
-    air: { status: Status.HIDDEN, value: 0.0, max: 10.0, merge: false },
-    earth: { status: Status.HIDDEN, value: 0.0, max: 10.0, merge: false },
-    fire: { status: Status.HIDDEN, value: 0.0, max: 10.0, merge: false },
-    water: { status: Status.HIDDEN, value: 0.0, max: 10.0, merge: false },
+    will: {
+      status: Status.HIDDEN, value: 0.0, max: 100.0, merge: false,
+    },
+    air: {
+      status: Status.HIDDEN, value: 0.0, max: 10.0, merge: false,
+    },
+    earth: {
+      status: Status.HIDDEN, value: 0.0, max: 10.0, merge: false,
+    },
+    fire: {
+      status: Status.HIDDEN, value: 0.0, max: 10.0, merge: false,
+    },
+    water: {
+      status: Status.HIDDEN, value: 0.0, max: 10.0, merge: false,
+    },
   },
   generators: [],
   stats: {
@@ -121,6 +133,9 @@ function applyGen(dt: number, { elements, stats }) {
         case GeneratorMode.PROPORTIONAL:
           srcDelta = (srcDelta * dstRatio) / Math.max(srcRatio, dstRatio);
           dstDelta = (dstDelta * srcRatio) / Math.max(srcRatio, dstRatio);
+          break;
+        default:
+          throw new Error(`Unknown generator mode ${gen.mode}`);
       }
     }
 
@@ -139,7 +154,7 @@ function applyGen(dt: number, { elements, stats }) {
 }
 
 const slice = createSlice({
-  name: "elements",
+  name: 'elements',
   initialState,
   reducers: {
     forceGen(state, action: PayloadAction<Element>) {
@@ -155,7 +170,7 @@ const slice = createSlice({
       state.stats.elements[name].manualGenerated += 1.0; // TODO as much as was actually generated
     },
     merge(state, action: PayloadAction<{ from: Element; to: Element }>) {
-      state = state;
+      // TODO
     },
     reinit(state, action: PayloadAction<DOMHighResTimeStamp>) {
       state.last = action.payload;
@@ -166,38 +181,38 @@ const slice = createSlice({
       state.generators.forEach(applyGen(dt, state));
     },
     story_revealWill(state) {
-      console.log("Proccing story 1");
+      console.log('Proccing story 1');
       state.elements.will.status = Status.DISCOVERABLE;
     },
     story_discoverWill(state) {
-      console.log("Proccing story 2");
+      console.log('Proccing story 2');
       state.elements.will.status = Status.PASSIVE;
       state.generators.push({
-        name: "willGain",
-        dst: "will",
+        name: 'willGain',
+        dst: 'will',
         dstPerSecond: 10.0,
       });
     },
     story_focusWill(state) {
-      console.log("Proccing story 3");
+      console.log('Proccing story 3');
       state.elements.air.status = Status.DISCOVERABLE;
     },
     story_discoverElements(state) {
-      console.log("Proccing story 4");
-      for (const x of ["air", "earth", "fire", "water"]) {
+      console.log('Proccing story 4');
+      ['air', 'earth', 'fire', 'water'].forEach((x) => {
         state.elements[x].status = Status.ACTIVE;
         state.generators.push(drainGenerator(x));
-      }
+      });
     },
     story_mergeExperiments(state) {
-      for (const x of ["will", "air", "earth", "fire", "water"]) {
+      ['will', 'air', 'earth', 'fire', 'water'].forEach((x) => {
         state.elements[x].merge = MERGE_EXPERIMENT;
-      }
+      });
     },
     story_enableMerging(state) {
-      for (const x of ["will", "air", "earth", "fire", "water"]) {
+      ['will', 'air', 'earth', 'fire', 'water'].forEach((x) => {
         state.elements[x].merge = MERGE_FULL;
-      }
+      });
     },
   },
 });
@@ -208,11 +223,11 @@ export default slice.reducer;
 
 const { reinit, onTick } = slice.actions;
 
-export const DISCOVER_WILL = "elements:will:discover";
-export const FOCUS_WILL = "elements:will:focus";
-export const MERGE_EXPERIMENT = "elements:merge:discover";
+export const DISCOVER_WILL = 'elements:will:discover';
+export const FOCUS_WILL = 'elements:will:focus';
+export const MERGE_EXPERIMENT = 'elements:merge:discover';
 
-const MERGE_FULL = slice.actions.merge({ from: "will", to: "will" }).type;
+const MERGE_FULL = slice.actions.merge({ from: 'will', to: 'will' }).type;
 
 function* waitForState(selector, test) {
   let state = yield select(selector);
@@ -222,15 +237,43 @@ function* waitForState(selector, test) {
   }
 }
 
+function* mergeExperiments() {
+  yield put(slice.actions.story_mergeExperiments());
+  while (true) {
+    const {
+      payload: { from, to },
+    } = yield take(MERGE_EXPERIMENT);
+
+    if ((from === 'will') !== (to === 'will')) {
+      yield put(newLore('Nah, yeah!'));
+      yield put(slice.actions.story_enableMerging());
+      return;
+    }
+
+    yield put(newLore('Yeah, nah'));
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export function* elementGeneration() {
+  const firstTick:PayloadAction<DOMHighResTimeStamp> = yield take(TICK_EVENT);
+  yield put(reinit(firstTick.payload));
+
+  yield takeLatest(TICK_EVENT, function* ticking() {
+    const now = yield select((state: CoreState) => state.time.now);
+    yield put(onTick(now));
+  });
+}
+
 function* elementsStory() {
-  yield put(newLore("You are floating, formless in the void."));
+  yield put(newLore('You are floating, formless in the void.'));
   yield delay(5000);
-  yield put(newLore("Formless, but you exist. How do you exist?"));
+  yield put(newLore('Formless, but you exist. How do you exist?'));
   yield delay(5000);
   yield put(
     newLore(
-      "You have no form, but you have thought. " +
-        "Can you gather your thoughts somehow?",
+      'You have no form, but you have thought. '
+        + 'Can you gather your thoughts somehow?',
     ),
   );
   yield put(slice.actions.story_revealWill());
@@ -239,67 +282,39 @@ function* elementsStory() {
   yield delay(5000);
   yield put(
     newLore(
-      "Your thoughts seem to be having an effect on the void. " +
-        "What will happen if you focus your will?",
+      'Your thoughts seem to be having an effect on the void. '
+        + 'What will happen if you focus your will?',
     ),
   );
   yield put(slice.actions.story_focusWill());
   yield take(FOCUS_WILL);
   yield put(
     newLore(
-      "Your will can bring form to the void. " +
-        "You notice four distinct forms you can create, and call them *Elements*",
+      'Your will can bring form to the void. '
+        + 'You notice four distinct forms you can create, and call them *Elements*',
     ),
   );
   yield put(slice.actions.story_discoverElements());
   yield waitForState(
     (state) => state.elements,
-    (state: ElementsState) => {
-      return (
-        10 <=
-        state.stats.elements.air.manualGenerated +
-          state.stats.elements.earth.manualGenerated +
-          state.stats.elements.fire.manualGenerated +
-          state.stats.elements.water.manualGenerated
-      );
-    },
+    (state: ElementsState) => (
+      state.stats.elements.air.manualGenerated
+          + state.stats.elements.earth.manualGenerated
+          + state.stats.elements.fire.manualGenerated
+          + state.stats.elements.water.manualGenerated
+        >= 10
+    ),
   );
   yield put(
     newLore(
-      "The excitement of creating elements from thought quickly fades, and so do the elements. " +
-        "Is there anything you can *do* with the elements you create?",
+      'The excitement of creating elements from thought quickly fades, and so do the elements. '
+        + 'Is there anything you can *do* with the elements you create?',
     ),
   );
-  yield merge_experiments();
+  yield mergeExperiments();
 }
 
-function* merge_experiments() {
-  yield put(slice.actions.story_mergeExperiments());
-  while (true) {
-    const {
-      payload: { from, to },
-    } = yield take(MERGE_EXPERIMENT);
-
-    if ((from === "will") !== (to === "will")) {
-      yield put(newLore("Nah, yeah!"));
-      yield put(slice.actions.story_enableMerging());
-      return;
-    }
-
-    yield put(newLore("Yeah, nah"));
-  }
-}
-
-export function* elementGeneration() {
-  const firstTick = yield take(TICK_EVENT);
-  yield put(reinit(firstTick.payload));
-
-  yield takeLatest(TICK_EVENT, function* () {
-    const now = yield select((state: CoreState) => state.time.now);
-    yield put(onTick(now));
-  });
-}
-
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function* elementsSaga() {
   yield all([elementsStory(), elementGeneration()]);
 }

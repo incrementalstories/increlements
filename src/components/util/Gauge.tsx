@@ -1,5 +1,5 @@
-import React, { useRef, useEffect } from "react";
-import SvgGauge from "svg-gauge";
+import React, { useRef, useEffect } from 'react';
+import SvgGauge from 'svg-gauge';
 
 interface GaugeProps {
   dialStartAngle?: number; // The angle in degrees to start the dial (135)
@@ -25,10 +25,9 @@ const defaultOptions = {
   showValue: true,
   initialValue: 0,
   max: 100,
-  // Put any other defaults you want. e.g. dialStartAngle, dialEndAngle, radius, etc.
 };
 
-export const Gauge = (props: GaugeProps) => {
+export const Gauge = (props: GaugeProps):JSX.Element => {
   const gaugeEl = useRef(null);
   const gaugeRef = useRef(null);
   useEffect(() => {
@@ -44,12 +43,11 @@ export const Gauge = (props: GaugeProps) => {
     return (
       <div
         ref={gaugeEl}
-        className={"gauge-container " + (props.className || "")}
+        className={`gauge-container ${props.className || ''}`}
       >
         <span className="inner">{props.children}</span>
       </div>
     );
-  } else {
-    return <div ref={gaugeEl} className="gauge-container" />;
   }
+  return <div ref={gaugeEl} className="gauge-container" />;
 };
